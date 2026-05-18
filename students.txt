@@ -1,0 +1,10 @@
+ALU001,John Kamau,BLK101
+ALU002,Claire Omollo,BLK101
+ALU003,Amad Diallo,BLK101
+ALU004,David Mwangi,CSC210
+ALU005,Fatima Ali,CSC210
+ALU006,Kevin Otieno,NET305
+ALU007,Grace Njeri,NET305
+ALU008,Brian Kiptoo,SWE220
+ALU009,Linda Wanjiku,SWE220
+ALU010,Samuel Ochieng,DBS110
