@@ -34,6 +34,8 @@ The system demonstrates how blockchain concepts can be applied to secure attenda
 └── README.md
 ```
 
+---
+
 # Compilation and execution
 
 Required dependencies are the OpenSSL development libraries.
