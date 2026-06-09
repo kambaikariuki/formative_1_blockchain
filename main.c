@@ -10,6 +10,9 @@
 
 #define MAX_STUDENTS 100
 #define SIGNATURE_SIZE 256
+#define MAX_PENDING 1000
+
+int pending_count = 0;
 
 typedef struct {
     char student_id[20];
@@ -35,6 +38,76 @@ typedef struct Block {
 
     struct Block *next;
 } Block;
+
+typedef struct {
+    char tx_id[65];
+    char student_id[20];
+    int amount;          // 10, 5, 0
+    int fee;             // fixed later (e.g. 1)
+    time_t timestamp;
+} Transaction;
+
+Transaction pending_pool[MAX_PENDING];
+
+
+void view_pending_transactions() {
+
+    printf("\n===== PENDING TRANSACTIONS =====\n");
+
+    for (int i = 0; i < pending_count; i++) {
+        printf("\nTX ID: %s\n", pending_pool[i].tx_id);
+        printf("Student ID: %s\n", pending_pool[i].student_id);
+        printf("Amount: %d\n", pending_pool[i].amount);
+        printf("Fee: %d\n", pending_pool[i].fee);
+        printf("Timestamp: %ld\n", pending_pool[i].timestamp);
+    }
+}
+
+void calculate_tx_hash(Transaction *tx, char output[65]) {
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+
+    char data[256];
+
+    sprintf(data, "%s%d%d%ld",
+        tx->student_id,
+        tx->amount,
+        tx->fee,
+        tx->timestamp
+    );
+
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_Update(&sha256, data, strlen(data));
+    SHA256_Final(hash, &sha256);
+
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+        sprintf(output + (i * 2), "%02x", hash[i]);
+    }
+
+    output[64] = '\0';
+}
+
+void create_transaction(char *student_id, int amount) {
+
+    if (pending_count >= MAX_PENDING) {
+        printf("Pending pool full!\n");
+        return;
+    }
+
+    Transaction tx;
+
+    strcpy(tx.student_id, student_id);
+    tx.amount = amount;
+    tx.fee = 1;
+    tx.timestamp = time(NULL);
+
+    calculate_tx_hash(&tx, tx.tx_id);
+
+    pending_pool[pending_count++] = tx;
+
+    printf("\nTransaction created and added to pending pool.\n");
+    printf("TX_ID: %s\n", tx.tx_id);
+}
 
 Student students[MAX_STUDENTS];
 int student_count = 0;
@@ -384,7 +457,8 @@ void menu() {
         printf("2. View Records\n");
         printf("3. Validate Blockchain\n");
         printf("4. Demonstrate Tampering\n");
-        printf("5. Exit\n");
+        printf("5. View Pending Transactions\n");
+        printf("6. Exit\n");
 
         printf("\nEnter choice: ");
         scanf("%d", &choice);
@@ -408,7 +482,15 @@ void menu() {
                 printf("Enter Status (PRESENT/LATE/ABSENT): ");
                 scanf("%s", status);
 
-                add_block(student, status);
+                if (strcmp(status, "PRESENT") == 0) {
+                    create_transaction(student->student_id, 10);
+                }
+                else if (strcmp(status, "LATE") == 0) {
+                    create_transaction(student->student_id, 5);
+                }
+                else {
+                    printf("No transaction created for ABSENT\n");
+                }
 
                 break;
             }
@@ -427,6 +509,10 @@ void menu() {
 
 
             case 5:
+                view_pending_transactions();
+                break;
+
+            case 6:
                 printf("\nExiting...\n");
                 exit(0);
 
