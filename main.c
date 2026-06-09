@@ -110,12 +110,10 @@ void mine_block(Block *block) {
 
         block->nonce++;
     }
-    printf("deeebug1");
     printf("\nBlock mined successfully with nonce %u\n", block->nonce);
-    printf("deeebug2");
+    
     for (int i = 0; i < block->tx_count; i++)
     {   
-        printf("deeebug");
         create_reward_utxo(&block->transactions[i]);
     }
 }
@@ -466,7 +464,6 @@ void mine_pending_transactions() {
 
     printf("\nMining block with %d transactions...\n", block->tx_count);
 
-    printf("1");
     mine_block(block);
 
     printf("2");
